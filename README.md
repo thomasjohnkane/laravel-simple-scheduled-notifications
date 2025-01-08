@@ -168,6 +168,21 @@ public function shouldInterrupt($notifiable) {
 
 If this method is not present on your notification, the notification will *not* be interrupted. Consider creating a shouldInterupt trait if you'd like to repeat conditional logic on groups of notifications.
 
+
+**Setting Next Schedule**
+
+If you want to send a reoccuring notification, you can add the `nextSchedule()` method to any notification. This method will be used to tell snooze if and when to send another notifiaction.
+
+For example, you might want to send a reminder every 7 days
+
+```php
+public function nextSchedule($notifiable) {
+    return now()->addDays();
+}
+```
+
+If this method is present on your notification, The time it returns will be used to schedule a notification again for that particular notification.
+
 **Scheduled Notification Meta Information**
 
 It's possible to store meta information on a scheduled notification, and then query the scheduled notifications by this meta information at a later stage.

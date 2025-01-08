@@ -91,6 +91,32 @@ class ScheduledNotification extends Model
         $this->save();
 
         event(new NotificationSent($this));
+        
+        if ($nextSchedule = $this->nextSchedule($notification, $notifiable)) {
+            $this->scheduleAgainAt($nextSchedule);
+        }
+    }
+
+    /**
+     * @param  object|null  $notification
+     * @param  object|null  $notifiable
+     * @return \DateTimeInterface|string|null
+     */
+    public function nextSchedule($notification, $notifiable)
+    {
+        if (!$notification) {
+            $notification = $this->serializer->unserialize($this->notification);
+        }
+
+        if (!$notifiable) {
+            $notifiable = $this->serializer->unserialize($this->target);
+        }
+
+        if (method_exists($notification, 'nextSchedule')) {
+            return $notification->nextSchedule($notifiable);
+        }
+
+        return null;
     }
 
     /**
