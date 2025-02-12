@@ -9,6 +9,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Thomasjohnkane\Snooze\Facades\Snooze;
 use Thomasjohnkane\Snooze\ServiceProvider;
+use Thomasjohnkane\Snooze\Tests\Models\Child;
 use Thomasjohnkane\Snooze\Tests\Models\User;
 
 class TestCase extends Orchestra
@@ -81,14 +82,28 @@ class TestCase extends Orchestra
             $table->timestamps();
         });
 
+        $app['db']->connection()->getSchemaBuilder()->create('children', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->unsignedInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->timestamps();
+        });
+
         foreach (range(1, 5) as $index) {
-            User::create(
-                [
-                    'name' => "user{$index}",
-                    'email' => "user{$index}@example.com",
-                    'password' => "password{$index}",
-                ]
-            );
+            $user = User::create([
+                'name' => "user{$index}",
+                'email' => "user{$index}@example.com",
+                'password' => "password{$index}",
+            ]);
+
+            // Create two children for each user
+            foreach (range(1, 2) as $childIndex) {
+                Child::create([
+                    'name' => "child{$childIndex}_user{$index}",
+                    'user_id' => $user->id,
+                ]);
+            }
         }
     }
 }

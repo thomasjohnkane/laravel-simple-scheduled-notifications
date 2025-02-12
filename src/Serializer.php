@@ -23,8 +23,7 @@ class Serializer
 
     public function serialize(object $notifiable): string
     {
-        $result = serialize($this->getSerializedPropertyValue(clone $notifiable));
-
+        $result = serialize($this->getSerializedPropertyValue(clone $notifiable, withRelations: ! (config('snooze.doNotLoadRelationsOnSerialize', false) === true)));
         if ($this->connection instanceof PostgresConnection && Str::contains($result, "\0")) {
             $result = base64_encode($result);
         }
