@@ -2,6 +2,7 @@
 
 namespace Thomasjohnkane\Snooze\Models;
 
+use __PHP_Incomplete_Class;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -58,7 +59,15 @@ class ScheduledNotification extends Model
         try {
             $notifiable = $this->serializer->unserialize($this->target);
             $notification = $this->serializer->unserialize($this->notification);
-        } catch(ModelNotFoundException $e) {
+
+            if (! is_object($notifiable) || ! is_object($notification)) {
+                throw new ModelNotFoundException('Unserialized event is not an object.');
+            }
+
+            if ($notifiable instanceof __PHP_Incomplete_Class || $notification instanceof __PHP_Incomplete_Class) {
+                throw new ModelNotFoundException('Unserialized event is an incomplete class (__PHP_Incomplete_Class).');
+            }
+        } catch (ModelNotFoundException $e) {
             if (config('snooze.deleteWhenMissingModels', false) === true) {
                 $this->delete();
                 event(new NotificationDeleted($this));
